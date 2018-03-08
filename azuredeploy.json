@@ -4,48 +4,70 @@
   "parameters": {
     "Subnet1AddressSpace": {
       "type": "string",
+      "allowedValues": [
+        "10.0.1.0/25",
+        "10.0.1.128.25",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ],
+      "defaultValue": "10.0.1.0/25",
       "metadata": {
         "description": "Subnet1"
       }
     },
     "Subnet2AddressSpace": {
       "type": "string",
+      "allowedValues": [
+        "10.0.1.0/25",
+        "10.0.1.128.25",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ],
+      "defaultValue": "10.0.1.128/25",
       "metadata": {
         "description": "Subnet2"
       }
     },
     "Subnet1Name": {
       "type": "string",
+      "defaultValue": "FrontendSubnet",
       "metadata": {
         "description": "Subnet1 Name"
       }
     },
     "Subnet2Name": {
       "type": "string",
+      "defaultValue": "BackendSubnet",
       "metadata": {
         "description": "Subnet2 Name"
       }
     },
     "adminUsername": {
-      "type": "string"
+      "type": "string",
+      "defaultValue": "graham"
     },
     "adminPassword": {
-      "type": "string"
-    },
-    "dnsNameforLBIP": {
-      "type": "string"
+      "type": "string",
+      "defaultValue": "Obvious123456"
+
     },
     "vmSize": {
+      "defaultValue": "Standard_A1_v2",
       "type": "string"
     },
     "ImagePublisher": {
+      "defaultValue": "MicrosoftWindowsServer",
       "type": "string"
     },
     "ImageOffer": {
+      "defaultValue": "WindowsServer",
       "type": "string"
     },
     "ImageSKU": {
-      "type": "string"
+      "type": "string",
+      "defaultValue": "2016-Datacenter-with-Containers"
     }
   },
 
@@ -59,7 +81,7 @@
     "storageAccountType": "Standard_LRS",
     "numberOfInstances": 4,
     "StoragePrefix": "[concat('gstorage', uniqueString(resourceGroup().id))]",
-    "NETtemplatelink": "https://gautomation123.blob.core.windows.net/azurecode/azuredeployNET.json",
+    "NETtemplatelink": "https://raw.githubusercontent.com/gpshute/AzureTemplates/master/Nested-Templates/azuredeployNET.json",
     "NETparameterslink": "https://gautomation123.blob.core.windows.net/azurecode/azuredeployNET.parameters.json"
       
     
