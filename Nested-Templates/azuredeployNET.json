@@ -1,0 +1,184 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "VirtualNetworkName": {
+        "type": "string",
+        "metadata": {
+          "description": {
+            "description": "Vnet Name"
+          }
+        }
+      },
+      "Subnet1AddressSpace": {
+        "type": "string",
+        "metadata": {
+          "description": "Subnet1"
+        }
+      },
+      "Subnet2AddressSpace": {
+        "type": "string",
+        "metadata": {
+          "description": "Subnet2"
+        }
+      },
+      "Subnet1Name": {
+        "type": "string",
+        "metadata": {
+          "description": "Subnet1 Name"
+        }
+      },
+      "Subnet2Name": {
+        "type": "string",
+        "metadata": {
+          "description": "Subnet2 Name"
+        }
+      }
+    },
+  
+  
+    "variables": {
+      "virtualNetworkName": "[concat(resourceGroup().name, '-NET')]",
+      "storageAccountType": "Standard_LRS",
+      "subnetName": "backendSubnet",
+      "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
+      "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]",
+      "numberOfInstances": 4,
+      "PublicIPName": "[concat(resourceGroup().name,'-PublicIP')]",
+      "PublicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('PublicIPName'))]",
+      "StoragePrefix": "[concat('gstorage', uniqueString(resourceGroup().id))]",
+      "LoadBalancerName": "[concat(resourceGroup().name,'-LB')]",
+      "VMtemplatelink": "https://raw.githubusercontent.com/sam-cogan/Demos/master/DemoExamples/newStorageAccount.json",
+      "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]"
+
+    },
+  
+   
+    "resources": [
+  
+      {
+        "apiVersion": "2017-03-01",
+        "type": "Microsoft.Network/loadBalancers",
+        "name": "[variables('loadBalancerName')]",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+          "[concat('Microsoft.Network/publicIPAddresses', '/',variables('PublicIPName'))]"
+        ],
+        "properties": {
+          "frontendIPConfigurations": [
+            {
+              "properties": {
+                "privateIPAllocationMethod": "Dynamic",
+                "publicIPAddress": {
+                  "id": "[variables('PublicIPID')]"
+                  
+                }
+  
+              },
+              "name": "LoadBalancerFrontend"
+            }
+          ],
+          "backendAddressPools": [
+            {
+              "name": "BackendPool1"
+            }
+          ],
+          "loadBalancingRules": [
+            {
+              "properties": {
+                "frontendIPConfiguration": {
+                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIpConfigurations/LoadBalancerFrontend')]"
+                },
+                "backendAddressPool": {
+                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/BackendPool1')]"
+                },
+                "probe": {
+                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe')]"
+                },
+                "protocol": "Tcp",
+                "frontendPort": 80,
+                "backendPort": 80,
+                "idleTimeoutInMinutes": 15
+              },
+              "Name": "lbrule"
+            }
+          ],
+          "probes": [
+            {
+              "properties": {
+                "protocol": "Tcp",
+                "port": 80,
+                "intervalInSeconds": 15,
+                "numberOfProbes": 2
+              },
+              "name": "lbprobe"
+            }
+          ]
+        }
+      },
+      {
+        "name": "[concat(resourceGroup().name,'-PublicIP')]",
+        "type": "Microsoft.Network/publicIPAddresses",
+        "apiVersion": "2017-03-01",
+        "location": "[resourceGroup().location]",
+        "properties": {
+            "publicIPAllocationMethod": "Dynamic"
+        },
+        "sku": {
+            "name": "Basic"
+        }
+      },
+  
+
+      {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[parameters('virtualNetworkName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "Operation-Status": "Production",
+        "Resource-Owner": "Graham"
+       },
+       "comments": "Is this a comment just for the template?",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.0.0.0/16"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[parameters('Subnet1Name')]",
+            "properties": {
+              "addressPrefix": "[parameters('Subnet1AddressSpace')]"
+            }
+          },
+          {
+          "name": "[parameters('Subnet2Name')]",
+          "properties": {
+              "addressPrefix": "[parameters('Subnet2AddressSpace')]"
+            }
+
+          }
+        ]
+      }
+    }
+  ],
+
+  "outputs": {
+    "vnetID": {
+      "type": "string",
+      "value": "[concat(resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName')))]"
+
+    },
+    "PublicIPID": {
+        "type": "string",
+        "value": "[resourceId('Microsoft.Network/publicIPAddresses',variables('PublicIPName'))]"
+    },
+    "lbID": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]"
+    }
+    
+  }
+}

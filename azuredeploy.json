@@ -1,0 +1,379 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "Subnet1AddressSpace": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet1"
+      }
+    },
+    "Subnet2AddressSpace": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet2"
+      }
+    },
+    "Subnet1Name": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet1 Name"
+      }
+    },
+    "Subnet2Name": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet2 Name"
+      }
+    },
+    "adminUsername": {
+      "type": "string"
+    },
+    "adminPassword": {
+      "type": "string"
+    },
+    "dnsNameforLBIP": {
+      "type": "string"
+    },
+    "vmSize": {
+      "type": "string"
+    },
+    "ImagePublisher": {
+      "type": "string"
+    },
+    "ImageOffer": {
+      "type": "string"
+    },
+    "ImageSKU": {
+      "type": "string"
+    }
+  },
+
+
+  "variables": {
+    "vNETResourceGroup": "[concat(resourceGroup().name, '-NET')]",
+    "vNetNetworkName": "[concat(resourceGroup().name, '-VNET')]",
+    "networkInterfaceName": "[concat(resourceGroup().name,'-NIC')]",
+    "VMNamePrefix": "[concat(resourceGroup().name,'-VM')]",
+    "availabilitySetName": "[concat(resourceGroup().name, '-AV')]",
+    "storageAccountType": "Standard_LRS",
+    "numberOfInstances": 4,
+    "StoragePrefix": "[concat('gstorage', uniqueString(resourceGroup().id))]",
+    "NETtemplatelink": "https://gautomation123.blob.core.windows.net/azurecode/azuredeployNET.json",
+    "NETparameterslink": "https://gautomation123.blob.core.windows.net/azurecode/azuredeployNET.parameters.json"
+      
+    
+
+  },
+
+ 
+  "resources": [
+
+    {
+      "apiVersion": "2017-05-10",
+      "name": "vNetTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "resourceGroup": "[variables('vNETResourceGroup')]",
+      "properties": {
+          "mode": "Incremental",
+          "templateLink": {
+              "uri": "[variables('NETtemplatelink')]",
+              "contentVersion": "1.0.0.0"
+          },
+  
+          "parameters": {
+            "virtualNetworkName": {
+              "Value": "[concat(variables('vNETResourceGroup'),'-vNET')]"
+            },
+            "Subnet1AddressSpace": {
+                "Value": "[parameters('Subnet1AddressSpace')]"
+              },
+              "Subnet2AddressSpace": {
+                "Value": "[parameters('Subnet2AddressSpace')]"
+              },
+              "Subnet1Name": {
+                "Value": "[parameters('Subnet1Name')]"
+              },
+              "Subnet2Name": {
+                "Value": "[parameters('Subnet2Name')]"
+              }
+          }
+      }
+    },
+
+
+
+
+    {
+      "comments": "Generalized from resource: '/subscriptions/fc1e8f1c-9d65-44dc-a4d9-2c876d65e898/resourceGroups/G-Template/providers/Microsoft.Compute/virtualMachines/G-VM-0/extensions/Microsoft.Powershell.DSC'.",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('vmNamePrefix'), copyindex(), '/', 'Microsoft.Powershell.DSC')]",
+      "copy": {
+        "name": "DSCvirtualMachineLoop",
+        "count": "[variables('numberOfInstances')]"
+      },
+
+
+      "apiVersion": "2017-03-30",
+      "location": "westus",
+      "tags": {
+          "AutomationAccountARMID": "/subscriptions/fc1e8f1c-9d65-44dc-a4d9-2c876d65e898/resourceGroups/G-AutomationAccount/providers/Microsoft.Automation/automationAccounts/G-AutomationAccount"
+      },
+      "scale": null,
+      "properties": {
+          "publisher": "Microsoft.Powershell",
+          "type": "DSC",
+          "typeHandlerVersion": "2.26",
+          "autoUpgradeMinorVersion": true,
+          "settings": {
+                    "ModulesUrl": "https://gautomation123.blob.core.windows.net/automation/UpdateLCMforAAPull.zip",
+                    "SasToken": "",
+                    "ConfigurationFunction": "UpdateLCMforAAPull.ps1\\ConfigureLCMforAAPull",
+              "Properties": [
+                  {
+                      "Name": "RegistrationKey",
+                      "Value": {
+                          "UserName": "graham",
+                          "Password": "PrivateSettingsRef:Obvious1"
+                      },
+                      "TypeName": "System.Management.Automation.PSCredential"
+                  },
+                  {
+                      "Name": "RegistrationUrl",
+                      "Value": "https://wcus-agentservice-prod-1.azure-automation.net/accounts/8faa5d94-a0c9-4fd4-800d-a51068eccd23",
+                      "TypeName": "System.String"
+                  },
+                  {
+                      "Name": "NodeConfigurationName",
+                      "Value": "IISInstall.G-Win2016-DC",
+                      "TypeName": "System.String"
+                  },
+                  {
+                      "Name": "ConfigurationMode",
+                      "Value": "applyAndMonitor",
+                      "TypeName": "System.String"
+                  },
+                  {
+                      "Name": "ConfigurationModeFrequencyMins",
+                      "Value": 15,
+                      "TypeName": "System.Int32"
+                  },
+                  {
+                      "Name": "RefreshFrequencyMins",
+                      "Value": 30,
+                      "TypeName": "System.Int32"
+                  },
+                  {
+                      "Name": "RebootNodeIfNeeded",
+                      "Value": false,
+                      "TypeName": "System.Boolean"
+                  },
+                  {
+                      "Name": "ActionAfterReboot",
+                      "Value": "continueConfiguration",
+                      "TypeName": "System.String"
+                  },
+                  {
+                      "Name": "AllowModuleOverwrite",
+                      "Value": false,
+                      "TypeName": "System.Boolean"
+                  }
+
+                ]
+          },
+          "protectedSettings": {
+            "Items": {
+              "Obvious1": "ma0qRevBNmebD/7ZpEalqDDs6PbNFIULVUYy6yGhtSqS7DBdKAQUXtKgm2XyXrqc2p7lmZquz5o3sJnBG+uiLw=="
+              }
+          
+          }
+      },
+      "dependsOn": [
+          "[resourceId('Microsoft.Compute/virtualMachines', concat(variables('vmNamePrefix'), copyindex()))]"
+      ]
+
+    },
+
+
+
+
+
+
+
+    {
+      "name": "[concat(variables('StoragePrefix'), copyindex())]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2016-01-01",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "Storage",
+      "location": "[concat(resourceGroup().location)]",
+      "copy": {
+        "name": "StorageLoop",
+        "count": "[variables('numberOfInstances')]"
+      },
+      "tags": {
+        "Operation-Status": "Production",
+        "Resource-Owner": "Graham",
+        "Nic-Comment": "Looped NIC"
+       },
+
+      "properties": {}
+    },
+
+    
+
+
+    
+    {
+      "apiVersion": "2016-04-30-preview",
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[variables('availabilitySetName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "platformFaultDomainCount": 2,
+        "platformUpdateDomainCount": 2,
+        "managed": true
+      }
+    },
+
+
+    
+
+    
+
+
+    {
+      "apiVersion": "2016-04-30-preview",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[concat(variables('vmNamePrefix'), copyindex())]",
+      "copy": {
+        "name": "virtualMachineLoop",
+        "count": "[variables('numberOfInstances')]"
+      },
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', concat(variables('StoragePrefix'), copyindex()))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'), copyindex())]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]"
+      ],
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[concat(variables('vmNamePrefix'), copyIndex())]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[parameters('imagePublisher')]",
+            "offer": "[parameters('imageOffer')]",
+            "sku": "[parameters('imageSKU')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('networkInterfaceName'),copyindex()))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true,
+            "storageUri": "[concat('http://',concat(variables('StoragePrefix'), copyindex()),'.blob.core.windows.net')]"
+          }
+        }
+
+        
+        
+        
+      }
+    },
+
+
+
+    {
+      "apiVersion": "2016-05-15",
+      "type": "microsoft.devtestlab/schedules",
+      "name": "[concat(concat('shutdown-computevm-',variables('vmNamePrefix'), copyindex()))]",
+      "copy": {
+        "name": "virtualMachineScheduleLoop",
+        "count": "[variables('numberOfInstances')]"
+      },
+
+
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+          "[concat('Microsoft.Compute/virtualMachines/',concat(variables('vmNamePrefix'), copyindex()))]"
+      ],
+      "properties": {
+          "status": "Enabled",
+          "taskType": "ComputeVmShutdownTask",
+          "dailyRecurrence": {
+              "time": "1900"
+          },
+          "timeZoneId": "W. Europe Standard Time",
+          "notificationSettings": {
+              "status": "Disabled",
+              "timeInMinutes": 15
+          },
+          "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines',concat(variables('vmNamePrefix'), copyindex()))]"
+      }
+  },    
+
+
+
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(variables('networkInterfaceName'), copyindex())]",
+      "location": "[resourceGroup().location]",
+      "copy": {
+        "name": "nicLoop",
+        "count": "[variables('numberOfInstances')]"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[concat(reference('vNetTemplate').outputs.vnetID.value ,'/subnets/',parameters('subnet1Name'))]"
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[concat(reference('vNetTemplate').outputs.lbID.value, '/backendAddressPools/BackendPool1')]"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+
+
+  ],
+  "outputs": {
+    "lbID": {
+      "type": "string",
+      "value": "[reference('vNetTemplate').outputs.lbID.value]"
+    }
+    
+  }
+
+}
+
+
+

@@ -1,0 +1,436 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualNetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "This is the name of the Virtual Network"
+      }
+    },
+    "networkInterfaceName": {
+      "type": "string",
+      "metadata": {
+        "description": "This is the prefix name of the Network interfaces"
+      }
+    },
+    "Subnet1AddressSpace": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet1"
+      }
+    },
+    "Subnet2AddressSpace": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet2"
+      }
+    },
+    "Subnet1Name": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet1 Name"
+      }
+    },
+    "Subnet2Name": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet2 Name"
+      }
+    },
+    "adminUsername": {
+      "type": "string"
+    },
+    "adminPassword": {
+      "type": "string"
+    },
+    "dnsNameforLBIP": {
+      "type": "string"
+    },
+    "vmNamePrefix": {
+      "type": "string"
+    },
+    "vmSize": {
+      "type": "string"
+    },
+    "ImagePublisher": {
+      "type": "string"
+    },
+    "ImageOffer": {
+      "type": "string"
+    },
+    "ImageSKU": {
+      "type": "string"
+    },
+    "loadBalancerName": {
+      "type": "string",
+      "metadata": {
+        "description": "This is the name of the loadbalancer"
+      }
+    }
+  },
+
+
+  "variables": {
+    "availabilitySetName": "[concat(resourceGroup().name, '-AV')]",
+    "storageAccountType": "Standard_LRS",
+    "subnetName": "backendSubnet",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]",
+    "numberOfInstances": 4,
+    "lbID": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
+    "PublicIPName": "[concat(resourceGroup().name,'-PublicIP')]",
+    "PublicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('PublicIPName'))]",
+    "StoragePrefix": "[concat('gstorage', uniqueString(resourceGroup().id))]"
+  },
+
+ 
+  "resources": [
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[parameters('virtualNetworkName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "Operation-Status": "Production",
+        "Resource-Owner": "Graham"
+       },
+       "comments": "Is this a comment just for the template?",
+
+
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.0.0.0/16"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[parameters('Subnet1Name')]",
+            "properties": {
+              "addressPrefix": "[parameters('Subnet1AddressSpace')]"
+            }
+          },
+          {
+          "name": "[parameters('Subnet2Name')]",
+          "properties": {
+              "addressPrefix": "[parameters('Subnet2AddressSpace')]"
+            }
+
+          }
+        ]
+      }
+    },
+
+    {
+      "name": "[concat(variables('StoragePrefix'), copyindex())]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2016-01-01",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "Storage",
+      "location": "[concat(resourceGroup().location)]",
+      "copy": {
+        "name": "StorageLoop",
+        "count": "[variables('numberOfInstances')]"
+      },
+      "tags": {
+        "Operation-Status": "Production",
+        "Resource-Owner": "Graham",
+        "Nic-Comment": "Looped NIC"
+       },
+
+      "properties": {}
+    },
+  
+    {
+      "apiVersion": "2016-04-30-preview",
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[variables('availabilitySetName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "platformFaultDomainCount": 2,
+        "platformUpdateDomainCount": 2,
+        "managed": true
+      }
+    },
+
+    {
+      "name": "[concat(resourceGroup().name,'-PublicIP')]",
+      "type": "Microsoft.Network/publicIpAddresses",
+      "apiVersion": "2017-08-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+          "publicIpAllocationMethod": "Dynamic"
+      },
+      "sku": {
+          "name": "Basic"
+      }
+    },
+
+    
+
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/loadBalancers",
+      "name": "[parameters('loadBalancerName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[variables('vnetID')]"
+      ],
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[variables('PublicIPID')]"
+              }
+
+            },
+            "name": "LoadBalancerFrontend"
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "BackendPool1"
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIpConfigurations/LoadBalancerFrontend')]"
+              },
+              "backendAddressPool": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/BackendPool1')]"
+              },
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/probes/lbprobe')]"
+              },
+              "protocol": "Tcp",
+              "frontendPort": 80,
+              "backendPort": 80,
+              "idleTimeoutInMinutes": 15
+            },
+            "Name": "lbrule"
+          }
+        ],
+        "probes": [
+          {
+            "properties": {
+              "protocol": "Tcp",
+              "port": 80,
+              "intervalInSeconds": 15,
+              "numberOfProbes": 2
+            },
+            "name": "lbprobe"
+          }
+        ]
+      }
+    },
+
+
+    {
+      "apiVersion": "2017-12-01",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[concat(parameters('vmNamePrefix'), copyindex())]",
+      "copy": {
+        "name": "virtualMachineLoop",
+        "count": "[variables('numberOfInstances')]"
+      },
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', concat(variables('StoragePrefix'), copyindex()))]",
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'), copyindex())]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]"
+      ],
+
+      "resources": [
+        {
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.26",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "ModulesUrl": "https://eus2oaasibizamarketprod1.blob.core.windows.net/automationdscpreview/RegistrationMetaConfigV2.zip",
+              "ConfigurationFunction": "RegistrationMetaConfigV2.ps1\\RegistrationMetaConfigV2",
+              "Properties": [
+                {
+                  "Name": "RegistrationKey",
+                  "Value": {
+                    "UserName": "PLACEHOLDER_DONOTUSE",
+                    "Password": "PrivateSettingsRef:registrationKeyPrivate"
+                  },
+                  "TypeName": "System.Management.Automation.PSCredential"
+                },
+                {
+                  "Name": "RegistrationUrl",
+                  "Value": "https://wcus-agentservice-prod-1.azure-automation.net/accounts/8faa5d94-a0c9-4fd4-800d-a51068eccd23",
+                  "TypeName": "System.String"
+                },
+                {
+                  "Name": "NodeConfigurationName",
+                  "Value": "IISInstall.G-Win2016-DC",
+                  "TypeName": "System.String"
+                },
+                {
+                  "Name": "ConfigurationMode",
+                  "Value": "applyAndMonitor",
+                  "TypeName": "System.String"
+                },
+                {
+                  "Name": "ConfigurationModeFrequencyMins",
+                  "Value": 15,
+                  "TypeName": "System.Int32"
+                },
+                {
+                  "Name": "RefreshFrequencyMins",
+                  "Value": 30,
+                  "TypeName": "System.Int32"
+                },
+                {
+                  "Name": "RebootNodeIfNeeded",
+                  "Value": false,
+                  "TypeName": "System.Boolean"
+                },
+                {
+                  "Name": "ActionAfterReboot",
+                  "Value": "continueConfiguration",
+                  "TypeName": "System.String"
+                },
+                {
+                  "Name": "AllowModuleOverwrite",
+                  "Value": false,
+                  "TypeName": "System.Boolean"
+                }
+              ]
+            },
+            "provisioningState": "Succeeded"
+          },
+          "type": "Microsoft.Compute/virtualMachines/extensions",
+          "location": "westus",
+          "tags": {
+            "AutomationAccountARMID": "/subscriptions/fc1e8f1c-9d65-44dc-a4d9-2c876d65e898/resourceGroups/G-AutomationAccount/providers/Microsoft.Automation/automationAccounts/G-AutomationAccount"
+          },
+          "id": "[concat('/subscriptions/fc1e8f1c-9d65-44dc-a4d9-2c876d65e898/resourceGroups/G-Template/providers/Microsoft.Compute/virtualMachines/', parameters('vmNamePrefix'), copyindex(),'/extensions/Microsoft.Powershell.DSC')]",
+          "name": "Microsoft.Powershell.DSC"
+        }
+      ],
+
+
+
+
+
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[concat(parameters('vmNamePrefix'), copyIndex())]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+         "storageProfile": {
+          "imageReference": {
+            "publisher": "[parameters('imagePublisher')]",
+            "offer": "[parameters('imageOffer')]",
+            "sku": "[parameters('imageSKU')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('networkInterfaceName'),copyindex()))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true,
+            "storageUri": "[concat('http://',concat(variables('StoragePrefix'), copyindex()),'.blob.core.windows.net')]"
+          }
+        }
+      }
+    },
+
+
+
+    {
+      "apiVersion": "2016-05-15",
+      "type": "microsoft.devtestlab/schedules",
+      "name": "[concat(concat('shutdown-computevm-',parameters('vmNamePrefix'), copyindex()))]",
+      "copy": {
+        "name": "virtualMachineScheduleLoop",
+        "count": "[variables('numberOfInstances')]"
+      },
+
+
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+          "[concat('Microsoft.Compute/virtualMachines/',concat(parameters('vmNamePrefix'), copyindex()))]"
+      ],
+      "properties": {
+          "status": "Enabled",
+          "taskType": "ComputeVmShutdownTask",
+          "dailyRecurrence": {
+              "time": "1900"
+          },
+          "timeZoneId": "W. Europe Standard Time",
+          "notificationSettings": {
+              "status": "Disabled",
+              "timeInMinutes": 15
+          },
+          "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines',concat(parameters('vmNamePrefix'), copyindex()))]"
+      }
+  },    
+
+
+
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(parameters('networkInterfaceName'), copyindex())]",
+      "location": "[resourceGroup().location]",
+      "copy": {
+        "name": "nicLoop",
+        "count": "[variables('numberOfInstances')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]",
+        "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[concat(variables('lbID'), '/backendAddressPools/BackendPool1')]"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+
+}
+
+
+
