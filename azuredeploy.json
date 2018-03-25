@@ -74,7 +74,7 @@
     "availabilitySetName": "[concat(resourceGroup().name, '-AV')]",
     "storageAccountType": "Standard_LRS",
     "numberOfInstances": 4,
-    "StoragePrefix": "[concat('gstorage', uniqueString(resourceGroup().id))]",
+    "StoragePrefix": "[concat(resourceGroup().name, uniqueString(resourceGroup().id))]",
     "NETtemplatelink": "https://raw.githubusercontent.com/gpshute/AzureTemplates/master/Nested-Templates/azuredeployNET.json",
     "NETparameterslink": "https://gautomation123.blob.core.windows.net/azurecode/azuredeployNET.parameters.json"
       
@@ -133,7 +133,7 @@
       "apiVersion": "2017-03-30",
       "location": "westus",
       "tags": {
-          "AutomationAccountARMID": "/subscriptions/a565716c-a220-4422-8648-809fb2942588/resourceGroups/G-Automation/providers/Microsoft.Automation/automationAccounts/G-AutomationAccount"
+          "AutomationAccountARMID": "/subscriptions/a565716c-a220-4422-8648-809fb2942588/resourceGroups/G-Automation-2/providers/Microsoft.Automation/automationAccounts/G-AutomationAccount-2"
       },
       "scale": null,
       "properties": {
@@ -149,14 +149,14 @@
                   {
                       "Name": "RegistrationKey",
                       "Value": {
-                          "UserName": "graham1",
+                          "UserName": "graham",
                           "Password": "PrivateSettingsRef:Obvious1"
                       },
                       "TypeName": "System.Management.Automation.PSCredential"
                   },
                   {
                       "Name": "RegistrationUrl",
-                      "Value": "https://eus2-agentservice-prod-1.azure-automation.net/accounts/8fe6631e-0483-49a4-804c-5231851815aa",
+                      "Value": "https://eus2-agentservice-prod-1.azure-automation.net/accounts/6b030f7d-9210-47db-ab4d-b66a625bf50b",
                       "TypeName": "System.String"
                   },
                   {
@@ -199,7 +199,7 @@
           },
           "protectedSettings": {
             "Items": {
-              "Obvious1": "8ufT1dT0oV1JnhRO3ax6hnBVXys22M+iDxOa1zspMtQEkFOqxjisjMj4a6cCnkKFcgbYxF6eQbZ3zIft7+EQqg=="
+              "Obvious1": "3e/NJuMt+de1lerphJSQyskVfMw9lngOizyKWCVL2kyL8z1td6o37p/gSjuErwPL8FJm1TGMxNYIn7Rrr1YJ4Q=="
               }
           
           }
