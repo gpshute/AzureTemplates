@@ -74,7 +74,7 @@
     "availabilitySetName": "[concat(resourceGroup().name, '-AV')]",
     "storageAccountType": "Standard_LRS",
     "numberOfInstances": 4,
-    "StoragePrefix": "[concat(resourceGroup().name, uniqueString(resourceGroup().id))]",
+    "StoragePrefix": "[concat(toLower(resourceGroup().name), uniqueString(resourceGroup().id))]",
     "NETtemplatelink": "https://raw.githubusercontent.com/gpshute/AzureTemplates/master/Nested-Templates/azuredeployNET.json",
     "NETparameterslink": "https://gautomation123.blob.core.windows.net/azurecode/azuredeployNET.parameters.json"
       
