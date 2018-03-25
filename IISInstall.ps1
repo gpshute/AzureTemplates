@@ -1,6 +1,6 @@
 configuration IISInstall
 {
-    Node G-Win2016-DC
+    Node CapGeminiDemoIISInstall
     {
         WindowsFeature IIS
         {

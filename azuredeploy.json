@@ -6,10 +6,7 @@
       "type": "string",
       "allowedValues": [
         "10.0.1.0/25",
-        "10.0.1.128.25",
-        "Standard_GRS",
-        "Standard_RAGRS",
-        "Premium_LRS"
+        "10.0.1.128.25"
       ],
       "defaultValue": "10.0.1.0/25",
       "metadata": {
@@ -20,10 +17,7 @@
       "type": "string",
       "allowedValues": [
         "10.0.1.0/25",
-        "10.0.1.128.25",
-        "Standard_GRS",
-        "Standard_RAGRS",
-        "Premium_LRS"
+        "10.0.1.128/25"
       ],
       "defaultValue": "10.0.1.128/25",
       "metadata": {
@@ -139,7 +133,7 @@
       "apiVersion": "2017-03-30",
       "location": "westus",
       "tags": {
-          "AutomationAccountARMID": "/subscriptions/fc1e8f1c-9d65-44dc-a4d9-2c876d65e898/resourceGroups/G-AutomationAccount/providers/Microsoft.Automation/automationAccounts/G-AutomationAccount"
+          "AutomationAccountARMID": "/subscriptions/a565716c-a220-4422-8648-809fb2942588/resourceGroups/G-Automation/providers/Microsoft.Automation/automationAccounts/G-AutomationAccount"
       },
       "scale": null,
       "properties": {
@@ -148,26 +142,26 @@
           "typeHandlerVersion": "2.26",
           "autoUpgradeMinorVersion": true,
           "settings": {
-                    "ModulesUrl": "https://gautomation123.blob.core.windows.net/automation/UpdateLCMforAAPull.zip",
+                    "ModulesUrl": "https://grahamshuteazure1.blob.core.windows.net/automation/UpdateLCMforAAPull.zip",
                     "SasToken": "",
                     "ConfigurationFunction": "UpdateLCMforAAPull.ps1\\ConfigureLCMforAAPull",
               "Properties": [
                   {
                       "Name": "RegistrationKey",
                       "Value": {
-                          "UserName": "graham",
+                          "UserName": "graham1",
                           "Password": "PrivateSettingsRef:Obvious1"
                       },
                       "TypeName": "System.Management.Automation.PSCredential"
                   },
                   {
                       "Name": "RegistrationUrl",
-                      "Value": "https://wcus-agentservice-prod-1.azure-automation.net/accounts/8faa5d94-a0c9-4fd4-800d-a51068eccd23",
+                      "Value": "https://eus2-agentservice-prod-1.azure-automation.net/accounts/8fe6631e-0483-49a4-804c-5231851815aa",
                       "TypeName": "System.String"
                   },
                   {
                       "Name": "NodeConfigurationName",
-                      "Value": "IISInstall.G-Win2016-DC",
+                      "Value": "IIsInstall.CapGeminiDemoIISInstall",
                       "TypeName": "System.String"
                   },
                   {
@@ -205,7 +199,7 @@
           },
           "protectedSettings": {
             "Items": {
-              "Obvious1": "ma0qRevBNmebD/7ZpEalqDDs6PbNFIULVUYy6yGhtSqS7DBdKAQUXtKgm2XyXrqc2p7lmZquz5o3sJnBG+uiLw=="
+              "Obvious1": "8ufT1dT0oV1JnhRO3ax6hnBVXys22M+iDxOa1zspMtQEkFOqxjisjMj4a6cCnkKFcgbYxF6eQbZ3zIft7+EQqg=="
               }
           
           }
