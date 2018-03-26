@@ -1,6 +1,13 @@
 param (
-    [Parameter(Mandatory=$true)][string]$DeploymentName="G-Template"
+    [Parameter(Mandatory=$true)][string]$DeploymentName="G-Template",
+    [Parameter(Mandatory=$true)][string]$Regurl="",
+    [Parameter(Mandatory=$true)][string]$RegistrationKey="",
+    [Parameter(Mandatory=$true)][string]$AccountDetails=""
 )
+
+
+.\azuredeploy.ps1 -DeploymentName CAPDemo -Regurl $RegistrationInfo.Endpoint  -RegistrationKey $RegistrationInfo.primarykey -AccountID $AccountDetails.resourceid 
+
 
 new-azurermresourcegroup -name ($DeploymentName) -location "West US"
 

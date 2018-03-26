@@ -62,7 +62,20 @@
     "ImageSKU": {
       "type": "string",
       "defaultValue": "2016-Datacenter-with-Containers"
-    }
+    },
+    "Regurl": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "RegistrationKey": {
+      "type": "string",
+      "defaultValue": ""
+    },
+
+    "AccountID": {
+      "type": "string",
+      "defaultValue": ""
+    }  
   },
 
 
@@ -89,7 +102,7 @@
       "apiVersion": "2017-05-10",
       "name": "vNetTemplate",
       "type": "Microsoft.Resources/deployments",
-      "resourceGroup": "[variables('vNETResourceGroup')]",
+      "resourceGroup": "[concat(variables('vNETResourceGroup'))]",
       "properties": {
           "mode": "Incremental",
           "templateLink": {
@@ -133,7 +146,7 @@
       "apiVersion": "2017-03-30",
       "location": "westus",
       "tags": {
-          "AutomationAccountARMID": "/subscriptions/a565716c-a220-4422-8648-809fb2942588/resourceGroups/G-Automation-2/providers/Microsoft.Automation/automationAccounts/G-AutomationAccount-2"
+          "AutomationAccountARMID": "[concat(parameters('AccountID'))]"
       },
       "scale": null,
       "properties": {
@@ -156,7 +169,7 @@
                   },
                   {
                       "Name": "RegistrationUrl",
-                      "Value": "https://eus2-agentservice-prod-1.azure-automation.net/accounts/6b030f7d-9210-47db-ab4d-b66a625bf50b",
+                      "Value": "[concat(parameters('regurl'))]",
                       "TypeName": "System.String"
                   },
                   {
@@ -199,7 +212,7 @@
           },
           "protectedSettings": {
             "Items": {
-              "Obvious1": "3e/NJuMt+de1lerphJSQyskVfMw9lngOizyKWCVL2kyL8z1td6o37p/gSjuErwPL8FJm1TGMxNYIn7Rrr1YJ4Q=="
+              "Obvious1": "[concat(parameters('registrationKey'))]"
               }
           
           }
