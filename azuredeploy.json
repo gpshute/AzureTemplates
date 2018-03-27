@@ -169,7 +169,7 @@
                   },
                   {
                       "Name": "RegistrationUrl",
-                      "Value": "[concat(parameters('Regurl'))]",
+                      "Value": "[concat(parameters('regurl'))]",
                       "TypeName": "System.String"
                   },
                   {
