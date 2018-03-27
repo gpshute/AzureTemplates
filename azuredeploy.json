@@ -169,7 +169,7 @@
                   },
                   {
                       "Name": "RegistrationUrl",
-                      "Value": "[concat(parameters('regurl'))]",
+                      "Value": "[concat(parameters('Regurl'))]",
                       "TypeName": "System.String"
                   },
                   {
@@ -212,7 +212,7 @@
           },
           "protectedSettings": {
             "Items": {
-              "Obvious1": "[concat(parameters('registrationKey'))]"
+              "Obvious1": "[concat(parameters('RegistrationKey'))]"
               }
           
           }
