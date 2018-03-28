@@ -29,6 +29,8 @@ write-host "..Done" -ForegroundColor Cyan
 $storagekey=Get-AzureRmStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $StorageAccountName 
 
 
+
+
 $storagecontext=New-AzureStorageContext -StorageAccountName  $StorageAccountName -StorageAccountKey $storagekey.value[0]
 $NewContainer=New-AzureStorageContainer -Name "automation" -Context $storagecontext -Permission Blob 
 
@@ -59,7 +61,12 @@ while($CompilationJob.EndTime -eq $null -and $CompilationJob.Exception -eq $null
 Write-Host ".Done" -ForegroundColor Cyan
 
 $CompilationJob | Get-AzureRmAutomationDscCompilationJobOutput -Stream Any
-
+write-host "Collecting Automation Account Details.." -ForegroundColor Cyan -NoNewline
 $Account = Get-AzureRmAutomationAccount -ResourceGroupName $ResourceGroupName -Name $AutomationAccountName
 $RegistrationInfo = $Account | Get-AzureRmAutomationRegistrationInfo
+$AccountDetails=get-azurermresource -ResourceName $account.AutomationAccountName -ResourceType "Microsoft.Automation/automationAccounts" -ResourceGroupName $resourcegroupname
+Write-Host "..Done" -ForegroundColor Cyan
+    
+
+#.\azuredeploy.ps1 -DeploymentName CAPDemo -Regurl $RegistrationInfo.Endpoint  -RegistrationKey $RegistrationInfo.primarykey -AccountID $AccountDetails.resourceid 
 
