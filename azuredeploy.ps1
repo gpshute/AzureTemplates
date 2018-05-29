@@ -1,11 +1,17 @@
 param (
-    [Parameter(Mandatory=$true)][string]$DeploymentName="G-Template",
-    [Parameter(Mandatory=$true)][string]$Regurl="",
-    [Parameter(Mandatory=$true)][string]$RegistrationKey="",
-    [Parameter(Mandatory=$true)][string]$AccountID=""
+    [Parameter(Mandatory=$true)] [string]$DeploymentName="G-Template"
+ #   [Parameter(Mandatory=$true)][string]$Regurl="",
+ #   [Parameter(Mandatory=$true)][string]$RegistrationKey="",
+ #   [Parameter(Mandatory=$true)][string]$AccountID=""
 )
 
 
+
+write-host "Collecting Automation Account Details.." -ForegroundColor Cyan -NoNewline
+$Account = Get-AzureRmAutomationAccount -ResourceGroupName $ResourceGroupName -Name $AutomationAccountName
+$RegistrationInfo = $Account | Get-AzureRmAutomationRegistrationInfo
+$AccountDetails=get-azurermresource -ResourceName $account.AutomationAccountName -ResourceType "Microsoft.Automation/automationAccounts" -ResourceGroupName $resourcegroupname
+Write-Host "..Done" -ForegroundColor Cyan
 #.\azuredeploy.ps1 -DeploymentName CAPDemo -Regurl $RegistrationInfo.Endpoint  -RegistrationKey $RegistrationInfo.primarykey -AccountID $AccountDetails.resourceid 
 
 

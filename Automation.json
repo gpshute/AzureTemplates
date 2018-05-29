@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+  },
+  "variables": {
+  },
+  "resources": [
+      {
+        "name": "G-Automate-3",
+        "type": "Microsoft.Automation/automationAccounts",
+        "apiVersion": "2015-10-31",
+        "properties": {
+            "sku": {
+            "name": "Free",
+            "family": "string"
+        }
+  },
+  "location": "eastus2",
+  "tags": {}
+}
+  ],
+  "outputs": {
+  }
+}
+
+
