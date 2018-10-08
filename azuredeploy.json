@@ -91,7 +91,9 @@
     "availabilitySetName": "[concat(resourceGroup().name, '-AV')]",
     "storageAccountType": "Standard_LRS",
     "numberOfInstances": 4,
+
     "StoragePrefix": "[concat(toLower(resourceGroup().name), uniqueString(resourceGroup().id))]",
+
     "NETtemplatelink": "https://raw.githubusercontent.com/gpshute/AzureTemplates/master/Nested-Templates/azuredeployNET.json",
     "NETparameterslink": "https://gautomation123.blob.core.windows.net/azurecode/azuredeployNET.parameters.json"
       
@@ -228,11 +230,6 @@
     },
 
 
-
-
-
-
-
     {
       "name": "[concat(variables('StoragePrefix'), copyindex())]",
       "type": "Microsoft.Storage/storageAccounts",
@@ -249,7 +246,7 @@
       "tags": {
         "Operation-Status": "Production",
         "Resource-Owner": "Graham",
-        "Nic-Comment": "Looped NIC"
+        "Storage-Comment": "Tempated Loop Storage"
        },
 
       "properties": {}
@@ -291,6 +288,12 @@
         "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'), copyindex())]",
         "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]"
       ],
+      "tags": {
+        "Operation-Status": "Production",
+        "Resource-Owner": "Graham",
+        "VM-Comment": "Tempated Loop Compute"
+       },
+
       "properties": {
         "availabilitySet": {
           "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]"

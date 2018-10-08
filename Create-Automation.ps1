@@ -23,14 +23,14 @@ write-host "..Done" -ForegroundColor Cyan
 
 write-host "Creating Storage Account.." $StorageAccountName ".." -ForegroundColor Cyan -NoNewline 
 # Create a new azure storage account.
-if (Get-AzureRmStorageAccountNameAvailability $StorageAccountName)
+if (Get-AzureRmStorageAccountNameAvailability $StorageAccountName) 
 {
     #create the storage account
   $myStorageAccount = New-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName -Location "eastus2" -SkuName Standard_LRS
 }
 write-host "..Done" -ForegroundColor Cyan
 
-$storagekey=Get-AzureRmStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $StorageAccountName 
+$Storagekey=Get-AzureRmStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $StorageAccountName 
 
 $DSCstoragecontext=New-AzureStorageContext -StorageAccountName  $StorageAccountName -StorageAccountKey $storagekey.value[0]
 $NewContainer=New-AzureStorageContainer -Name "automation" -Context $DSCstoragecontext -Permission Blob 
