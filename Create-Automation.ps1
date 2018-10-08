@@ -10,7 +10,7 @@ $ResourceGroupName=$DeploymentName + "-Auto"
 $pattern = '[^a-zA-Z]'
 $StorageAccountName=$ResourceGroupName.ToLower() + (get-random -Maximum 100000000)
 $StorageAccountName -replace $pattern, '' 
-$StorageAccountName= $StorageAccountname.Replace("-","").tolower()
+$StorageAccountName=$StorageAccountname.Replace("-","").tolower()
 $StorageAccountName=$StorageAccountname.Replace("_","").tolower()
 
 write-host "Creating resource group" $ResourceGroupName ".." -ForegroundColor Cyan -NoNewline
@@ -30,21 +30,18 @@ if (Get-AzureRmStorageAccountNameAvailability $StorageAccountName)
 }
 write-host "..Done" -ForegroundColor Cyan
 
-
 $storagekey=Get-AzureRmStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $StorageAccountName 
 
+$DSCstoragecontext=New-AzureStorageContext -StorageAccountName  $StorageAccountName -StorageAccountKey $storagekey.value[0]
+$NewContainer=New-AzureStorageContainer -Name "automation" -Context $DSCstoragecontext -Permission Blob 
 
-
-
-$storagecontext=New-AzureStorageContext -StorageAccountName  $StorageAccountName -StorageAccountKey $storagekey.value[0]
-$NewContainer=New-AzureStorageContainer -Name "automation" -Context $storagecontext -Permission Blob 
-
-$UploadBlob1=Set-AzureStorageBlobContent -File ".\UpdateLCMforAAPull.zip" -Blob "UpdateLCMforAAPull.zip" -Context $storagecontext -Container "automation"
-$UploadBloc2=Set-AzureStorageBlobContent -File "C:\Users\gshute\Documents\azure\Github\Templates\xWebadministration.zip" -Blob "xWebadministration.zip" -Context $storagecontext -Container "automation"
+$UploadBlob1=Set-AzureStorageBlobContent -File ".\UpdateLCMforAAPull.zip" -Blob "UpdateLCMforAAPull.zip" -Context $DSCstoragecontext -Container "automation"
+$DSCURL=($DSCstoragecontext.BlobEndPoint + "automation/UpdateLCMforAAPull.zip")
+$UploadBloc2=Set-AzureStorageBlobContent -File "C:\Users\gshute\Documents\azure\Github\Templates\xWebadministration.zip" -Blob "xWebadministration.zip" -Context $DSCstoragecontext -Container "automation"
 
 write-host "Importing DSC Module" -NoNewline -ForegroundColor Cyan
 
-$NewModule=New-AzureRmAutomationModule -Name xWebAdministration -ContentLinkUri ($storagecontext.BlobEndPoint + "automation/xWebadministration.zip") -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName
+$NewModule=New-AzureRmAutomationModule -Name xWebAdministration -ContentLinkUri ($DSCstoragecontext.BlobEndPoint + "automation/xWebadministration.zip") -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName
 while($NewModule.ProvisioningState -ne "Succeeded")
 {
     $NewModule = $NewModule | Get-AzureRmAutomationModule
@@ -67,8 +64,10 @@ Write-Host ".Done" -ForegroundColor Cyan
 
 $CompilationJob | Get-AzureRmAutomationDscCompilationJobOutput -Stream Any
 
-    
+Write-Host $DSCURL    
+.\azuredeploy.ps1 -DeploymentName $DeploymentName -DSCBlobContext $DSCURL
 
-#.\azuredeploy.ps1 -DeploymentName CAPDemo -Regurl $RegistrationInfo.Endpoint  -RegistrationKey $RegistrationInfo.primarykey -AccountID $AccountDetails.resourceid 
-.\azuredeploy.ps1 -DeploymentName CAPDemo  
+
+#.\azuredeploy.ps1 -DeploymentName CAPDemo -Regurl $RegistrationInfo.Endpoint  -RegistrationKey $RegistrationInfo.primarykey -AccountID $AccountDetails.resourceid -DSCBlobContext $UploadBlob1.context.BlobEndPoint + "automation/UpdateLCMforAAPull.zip"
+#.\azuredeploy.ps1 -DeploymentName CAPDemo  
 

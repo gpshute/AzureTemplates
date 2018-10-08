@@ -75,7 +75,11 @@
     "AccountID": {
       "type": "string",
       "defaultValue": ""
-    }  
+    },
+    "DSCBlobContext": {
+      "type": "string",
+      "defaultValue": ""
+    }	
   },
 
 
@@ -155,7 +159,7 @@
           "typeHandlerVersion": "2.26",
           "autoUpgradeMinorVersion": true,
           "settings": {
-                    "ModulesUrl": "https://grahamshuteazure1.blob.core.windows.net/automation/UpdateLCMforAAPull.zip",
+                    "ModulesUrl": "[concat (parameters('DSCBlobContext'))]",
                     "SasToken": "",
                     "ConfigurationFunction": "UpdateLCMforAAPull.ps1\\ConfigureLCMforAAPull",
               "Properties": [
