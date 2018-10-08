@@ -246,7 +246,7 @@
       "tags": {
         "Operation-Status": "Production",
         "Resource-Owner": "Graham",
-        "Storage-Comment": "Tempated Loop Storage"
+        "Storage-Comment": "Templated Loop Storage"
        },
 
       "properties": {}
@@ -261,6 +261,11 @@
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[variables('availabilitySetName')]",
       "location": "[resourceGroup().location]",
+      "tags": {
+        "Operation-Status": "Production",
+        "Resource-Owner": "Graham",
+        "VM-Comment": "Templated Availablity Set"
+       },
       "properties": {
         "platformFaultDomainCount": 2,
         "platformUpdateDomainCount": 2,
@@ -291,7 +296,7 @@
       "tags": {
         "Operation-Status": "Production",
         "Resource-Owner": "Graham",
-        "VM-Comment": "Tempated Loop Compute"
+        "VM-Comment": "Templated Loop Compute"
        },
 
       "properties": {
@@ -379,6 +384,11 @@
         "name": "nicLoop",
         "count": "[variables('numberOfInstances')]"
       },
+      "tags": {
+        "Operation-Status": "Production",
+        "Resource-Owner": "Graham",
+        "VM-Comment": "Templated Loop NIC"
+       },
       "properties": {
         "ipConfigurations": [
           {

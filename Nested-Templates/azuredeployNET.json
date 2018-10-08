@@ -64,6 +64,11 @@
         "dependsOn": [
           "[concat('Microsoft.Network/publicIPAddresses', '/',variables('PublicIPName'))]"
         ],
+        "tags": {
+          "Operation-Status": "Production",
+          "Resource-Owner": "Graham",
+          "VM-Comment": "Templated Load Balancer"
+         },
         "properties": {
           "frontendIPConfigurations": [
             {
